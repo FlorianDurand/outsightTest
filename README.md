@@ -1,8 +1,9 @@
-# Vue3 Technical Test
+# Florian Durand Vue3 Technical Test
 
 ## Description
 
-This is a generic Vue3 starter project to kickstart technical tests.
+This is my test for outsight, i tried my best to handle with Vue3 ;)
+
 
 ## Recommended IDE Setup
 
