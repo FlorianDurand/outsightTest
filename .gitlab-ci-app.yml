@@ -1,0 +1,38 @@
+# Cache dependencies
+cache:
+  key: app-${CI_COMMIT_REF_SLUG}
+  paths:
+    - app/node_modules/
+
+app-build:
+  image: ${DOCKER_CACHE_REGISTRY}library/node:16-alpine
+  tags: [ amd64-build ]
+  artifacts:
+    paths:
+      - app/dist/*
+  stage: build_and_test
+  script:
+    - cd app && npm i
+    - npm run quality-checks:prod
+    - npm run build:prod
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - app/**/*    
+    - if: $CI_COMMIT_TAG
+
+app-package:  
+  image: ${DOCKER_CACHE_REGISTRY}library/docker:20.10
+  stage: package
+  tags: [ docker ]
+  needs: [ "app-build" ]
+  dependencies: [ "app-build" ]
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker build --pull -t "$CI_REGISTRY_IMAGE/app:$CI_COMMIT_REF_NAME" ./app
+    - docker push "$CI_REGISTRY_IMAGE/app:$CI_COMMIT_REF_NAME"
+  rules:
+    - if: $CI_COMMIT_TAG

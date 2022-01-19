@@ -1,0 +1,7 @@
+# eslint ignores hidden files by default
+!.*.json
+!.*.js
+**/node_modules
+**/dist
+
+package-lock.json
